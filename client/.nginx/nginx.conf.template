@@ -1,0 +1,29 @@
+server {
+
+    listen 80;
+
+    location / {
+            root /usr/share/nginx/html;
+            index index.html;
+            try_files $uri $uri/ /index.html =404;
+            ssi on;
+            ssi_types application/javascript;
+            set $api_base_url "${API_BASE_URL}";
+            set $broker_url "${BROKER_URL}";
+            set $oauth2_redirect_uri "${OAUTH2_REDIRECT_URI}";
+            set $stun_url "${STUN_URL}";
+            set $turn_url_1 "${TURN_URL_1}";
+            set $turn_url_2 "${TURN_URL_2}";
+            set $turn_url_3 "${TURN_URL_3}";
+            set $turn_url_4 "${TURN_URL_4}";
+            set $turn_username "${TURN_USERNAME}";
+            set $turn_credential "${TURN_CREDENTIAL}";
+    }
+
+
+    error_page   500 502 503 504  /50x.html;
+
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}

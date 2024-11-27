@@ -1,0 +1,205 @@
+<div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+  <div class="fixed inset-0 bg-gray-700 bg-opacity-75 transition-opacity"></div>
+  <div class="fixed inset-0 z-10 w-screen overflow-y-auto text-gray-700">
+    <div class="flex min-h-full justify-center p-4 text-center items-center">
+      <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all w-full max-w-lg">
+        <form (ngSubmit)="confirmAddNewRoom()" [formGroup]="newRoomForm" class="p-4 flex flex-col gap-2">
+          <span class="tex-xl font-bold">Create New Chat</span>
+          <hr />
+          <span class="flex flex-col">
+            <input
+              type="text"
+              id="roomName"
+              name="roomName"
+              class="w-full placeholder:text-base rounded-lg border-0 py-1.5 px-2 text-gray-600 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-400 sm:text-sm sm:leading-6"
+              placeholder="Room name"
+              formControlName="roomName"
+              [ngClass]="{
+                'border-2 border-red-400': roomName?.invalid && roomName?.touched
+              }"
+            />
+            <div class="text-red-400 text-xs mt-1" *ngIf="roomName?.invalid && (roomName?.dirty || roomName?.touched)">
+              <div *ngIf="roomName?.hasError('required')">Room name is required.</div>
+            </div>
+          </span>
+          <span class="flex flex-col">
+            <span>Add chat participants</span>
+            <span class="text-gray-400 text-xs text-justify">
+              Note: If you select only one participant, the chat will become a direct message instead of a room with custom
+              name.</span
+            >
+            @if (showNoParticipantsMessage) {
+            <span class="text-red-400 text-xs">You must add at least one participant to create a room</span>
+            }
+          </span>
+          <div class="flex overflow-x-auto gap-2">
+            <span
+              *ngFor="let participant of newChatParticipants | keyvalue"
+              class="flex ring-1 ring-inset ring-gray-300 rounded-lg px-2 py-0.5 max-w-32 items-center justify-between"
+            >
+              <span class="flex flex-col flex-grow min-w-0">
+                <span class="text-sm text-ellipsis overflow-hidden whitespace-nowrap">{{ participant.value.nickname }}</span>
+                <span class="text-gray-400 text-xs text-ellipsis overflow-hidden whitespace-nowrap">{{ participant.key }}</span>
+              </span>
+              <button
+                class="rounded-full w-6 h-6 flex-shrink-0 flex items-center justify-center group hover:bg-gray-200 ml-2"
+                type="button"
+                (click)="removeChatParticipant(participant.key)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="2.5"
+                  stroke="currentColor"
+                  class="w-4 h-4 text-gray-400"
+                >
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </span>
+          </div>
+          <span class="relative block w-full">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="1.5"
+              stroke="currentColor"
+              class="w-6 h-6 text-gray-400 pointer-events-none absolute top-1/2 transform -translate-y-1/2 left-2"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
+              />
+            </svg>
+            @if (modalSearchInput.value) {
+            <button
+              class="rounded-full w-6 h-6 flex items-center justify-center group hover:bg-gray-200 absolute top-1/2 transform -translate-y-1/2 right-2"
+              (click)="clearModalSearchInput()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke-width="2.5"
+                stroke="currentColor"
+                class="w-4 h-4 text-gray-400 pointer-events-none"
+              >
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+              </svg>
+            </button>
+            }
+
+            <input
+              [formControl]="modalSearchInput"
+              class="w-full pl-9 placeholder:text-base rounded-lg border-0 py-1.5 px-2 text-gray-600 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-violet-400 sm:text-sm sm:leading-6"
+              placeholder="Search..."
+            />
+          </span>
+
+          <div class="flex flex-col divide-y overflow-y-auto max-h-64">
+            @for (user of foundUsers; track $index) {
+            <span class="flex justify-between w-11/12 items-center mx-auto py-1">
+              <span class="flex justify-center items-center gap-2">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-10 h-10"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+                  />
+                </svg>
+                <span class="flex flex-col">
+                  <span>{{ user.nickname }}</span>
+                  <span class="text-gray-400 text-xs">{{ user.email }}</span>
+                </span>
+              </span>
+              @if (this.newChatParticipants.has(user.email)) {
+              <button
+                type="button"
+                class="w-10 h-10 rounded-full hover:bg-gray-200 flex items-center justify-center group"
+                (click)="removeChatParticipant(user.email)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6 group-hover:hidden"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+                  />
+                </svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6 hidden group-hover:block"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M22 10.5h-6m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM4 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 10.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
+                  />
+                </svg>
+              </button>
+              } @else {
+              <button
+                type="button"
+                class="w-10 h-10 rounded-full hover:bg-gray-200 flex items-center justify-center"
+                (click)="addParticipant(user)"
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke-width="1.5"
+                  stroke="currentColor"
+                  class="w-6 h-6"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    d="M18 7.5v3m0 0v3m0-3h3m-3 0h-3m-2.25-4.125a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0ZM3 19.235v-.11a6.375 6.375 0 0 1 12.75 0v.109A12.318 12.318 0 0 1 9.374 21c-2.331 0-4.512-.645-6.374-1.766Z"
+                  />
+                </svg>
+              </button>
+              }
+            </span>
+
+            }
+          </div>
+          <div class="flex gap-2 justify-end">
+            <button
+              type="button"
+              class="rounded-lg py-1.5 px-2 ring-1 ring-inset text-gray-700 ring-gray-300 hover:ring-violet-400 hover:ring-2"
+              (click)="toggleAddingNewRoom()"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              class="rounded-lg py-1.5 px-2 ring-inset bg-gray-700 text-white ring-gray-300 hover:ring-violet-400 hover:ring-2"
+            >
+              Add
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

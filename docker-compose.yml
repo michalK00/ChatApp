@@ -1,0 +1,54 @@
+services:
+  chat-service:
+    container_name: chat-service
+    restart: unless-stopped
+    build:
+      context: ./chat-service
+      dockerfile: Dockerfile
+    environment:
+      - DB_LOGIN=${CHAT_SERVICE_DB_LOGIN}
+      - DB_PASSWORD=${CHAT_SERVICE_DB_PASSWORD}
+      - DB_URL=${CHAT_SERVICE_DB_URL}
+      - GOOGLE_CLIENT_ID=${CHAT_SERVICE_GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${CHAT_SERVICE_GOOGLE_CLIENT_SECRET}
+      - JWTSECRET=${CHAT_SERVICE_JWTSECRET}
+    ports:
+      - "${CHAT_SERVICE_PORT}:8080"
+    depends_on:
+      - postgresdb
+  postgresdb:
+    image: postgres:16
+    container_name: postgresdb
+    environment:
+      POSTGRES_USER: ${CHAT_SERVICE_DB_LOGIN}
+      POSTGRES_PASSWORD: ${CHAT_SERVICE_DB_PASSWORD}
+      POSTGRES_DB: ${CHAT_SERVICE_DB_NAME}
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-chat-data:/var/lib/postgresql/data
+  client:
+    container_name: chat-client
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    environment:
+      - API_BASE_URL=${API_BASE_URL}
+      - BROKER_URL=${BROKER_URL}
+      - OAUTH2_REDIRECT_URI=${OAUTH2_REDIRECT_URI}
+      - STUN_URL=${STUN_URL}
+      - TURN_URL_1=${TURN_URL_1}
+      - TURN_URL_2=${TURN_URL_2}
+      - TURN_URL_3=${TURN_URL_3}
+      - TURN_URL_4=${TURN_URL_4}
+      - TURN_USERNAME=${TURN_USERNAME}
+      - TURN_CREDENTIAL=${TURN_CREDENTIAL}
+    ports:
+      - "4200:80"
+volumes:
+  db-chat-data:
+
+networks:
+  default:
+    name: chat-network
+    external: true
